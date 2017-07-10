@@ -1,19 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="grothedev.randomreminders.MainActivity">
+<ScrollView xmlns:android = "http://schemas.android.com/apk/res/android"
+    android:layout_height="fill_parent"
+    android:layout_width="fill_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginLeft="12dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        tools:context="com.example.thomas.test.MainActivity">
 
-</android.support.constraint.ConstraintLayout>
+        <!--<Button
+            android:id="@+id/buttonFileSelect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="File of list of reminders"
+            app:layout_constraintBottom_toTopOf="@+id/timePickerStart" />
+        -->
+
+
+        <TextView
+            android:id="@+id/textViewFileInstructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Input the path of the text file (within external storage) which contains the phrases of which you would like to be randomly notified throughout the day" />
+
+        <EditText
+            android:id="@+id/editTextFilePath"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TimePicker
+            android:id="@+id/timePickerStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@+id/timePickerEnd" />
+
+        <TimePicker
+            android:id="@+id/timePickerEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@+id/editTextNumTimesDaily" />
+
+        <EditText
+            android:id="@+id/editTextNumTimesDaily"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            app:layout_constraintBottom_toTopOf="@+id/switchActive" />
+
+        <Switch
+            android:id="@+id/switchActive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Active"
+            app:layout_constraintTop_toBottomOf="@+id/editTextNumTimesDaily" />
+
+
+
+    </LinearLayout>
+</ScrollView>
