@@ -2,6 +2,7 @@ package grothedev.randomreminders;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -66,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     //make sure start time is before end time
-                    if (inputStartTime.getHour() > inputEndTime.getHour()){
+                    //TODO get time from timepickers
+                    /*if (inputStartTime.getHour() > inputEndTime.getHour()){
                         if (inputStartTime.getMinute() >= inputEndTime.getMinute()){
                             Toast t = Toast.makeText(getApplicationContext(), "your start time is after the end time", Toast.LENGTH_SHORT);
                             t.show();
@@ -76,7 +78,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else {
                         doNotifications();
-                    }
+                    }*/
+                    doNotifications();
 
                     //do the random notifications
                 } else {
@@ -88,7 +91,10 @@ public class MainActivity extends AppCompatActivity {
 
     //this method is called after everything is set up, it starts the process of notifying at certain random times, which i will research next
     private void doNotifications(){
-
+        NotificationService notificationService = new NotificationService();
+        Intent notificationIntent = new Intent(this, NotificationService.class);
+        notificationIntent.putExtra("messages", messages);
+        startService(notificationIntent);
     }
 
     private void requestFileReadPermission(){
