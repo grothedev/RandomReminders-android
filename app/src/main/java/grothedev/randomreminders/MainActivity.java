@@ -23,6 +23,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Random;
+import java.util.Stack;
 
 //CURRENT STATUS: dealing with times
 public class MainActivity extends AppCompatActivity {
@@ -43,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<String> messages;
 
-    @TargetApi(23) //this is for getting the time from the time pickers
+    //@TargetApi(23) //this is for getting the time from the time pickers
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,9 +70,8 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     //make sure start time is before end time
-                    //TODO get time from timepickers
-                    /*if (inputStartTime.getHour() > inputEndTime.getHour()){
-                        if (inputStartTime.getMinute() >= inputEndTime.getMinute()){
+                    if (inputStartTime.getCurrentHour() > inputEndTime.getCurrentHour()){
+                        if (inputStartTime.getCurrentMinute() >= inputEndTime.getCurrentMinute()){
                             Toast t = Toast.makeText(getApplicationContext(), "your start time is after the end time", Toast.LENGTH_SHORT);
                             t.show();
                             switchActive.setChecked(false);
@@ -78,10 +80,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else {
                         doNotifications();
-                    }*/
-                    doNotifications();
+                    }
 
-                    //do the random notifications
                 } else {
                     //deactivate
                 }
@@ -91,10 +91,49 @@ public class MainActivity extends AppCompatActivity {
 
     //this method is called after everything is set up, it starts the process of notifying at certain random times, which i will research next
     private void doNotifications(){
+
+        Stack<Integer> timeIntervals = generateTimeIntervals(); //contains time intervals in ms between each notification, starting now. the background service will pop these time intervals.
+
         NotificationService notificationService = new NotificationService();
         Intent notificationIntent = new Intent(this, NotificationService.class);
+
+        //passing relevant data to the background process
+        notificationIntent.putExtra("startTime", inputStartTime.getCurrentHour() * 60 * 60 + inputStartTime.getCurrentMinute() * 60);
+        notificationIntent.putExtra("endTime", inputEndTime.getCurrentHour() * 60 * 60 + inputEndTime.getCurrentMinute() * 60);
+        notificationIntent.putExtra("numTimes", Integer.parseInt(inputNumTimes.getText().toString()));
         notificationIntent.putExtra("messages", messages);
+
         startService(notificationIntent);
+    }
+
+    private Stack<Integer> generateTimeIntervals(){
+        Stack<Integer> intervals = new Stack<>();
+        Random rand = new Random();
+
+        int startTime = inputStartTime.getCurrentHour() * 60 * 60 + inputStartTime.getCurrentMinute() * 60;
+        int endTime = inputEndTime.getCurrentHour() * 60 * 60 + inputEndTime.getCurrentMinute() * 60;
+        int currentTime = Calendar.getInstance().get(Calendar.MILLISECOND);
+        int initialWait = 0; //how long to wait before firing the first notification
+
+        if (startTime > currentTime) {
+            startTime = currentTime;
+        } else {
+            initialWait = startTime - currentTime;
+        }
+
+        int timeRange = endTime - startTime;
+
+        int meanInterval = timeRange / Integer.parseInt(inputNumTimes.getText().toString());
+        int deviation = rand.nextInt(meanInterval) - meanInterval/2; //possible deviation of half of the interval range seems good
+        intervals.push(initialWait + deviation);
+
+        for (int i = 1; i < Integer.parseInt(inputNumTimes.getText().toString()); i++){
+            deviation = rand.nextInt(meanInterval / 2);
+            intervals.push(meanInterval + deviation);
+        }
+
+        //NOTE this is currently not strictly within the specified range
+        return intervals;
     }
 
     private void requestFileReadPermission(){
