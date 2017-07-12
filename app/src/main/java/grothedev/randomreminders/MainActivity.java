@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<String> messages;
 
+    //public static Stack<Integer> timeIntervals;
+
     //@TargetApi(23) //this is for getting the time from the time pickers
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         notificationIntent.putExtra("endTime", inputEndTime.getCurrentHour() * 60 * 60 + inputEndTime.getCurrentMinute() * 60);
         notificationIntent.putExtra("numTimes", Integer.parseInt(inputNumTimes.getText().toString()));
         notificationIntent.putExtra("messages", messages);
+        notificationIntent.setAction("SETUP_BACKGROUND_SERVICE");
 
         startService(notificationIntent);
     }
