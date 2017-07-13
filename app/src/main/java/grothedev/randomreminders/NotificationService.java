@@ -57,6 +57,7 @@ public class NotificationService extends IntentService {
 
 
             //setting up alarm
+            Log.d("now setting up alarm", "");
             Intent notificationIntent = new Intent(getApplicationContext(), NotificationService.class);
             notificationIntent.setAction("NOTIFY");
             AlarmManager alarmManager = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
@@ -120,7 +121,7 @@ public class NotificationService extends IntentService {
         }
 
         int meanInterval = timeRange / numTimes;
-        int deviation = rand.nextInt(meanInterval) - meanInterval/2; //possible deviation of half of the interval range seems good
+        int deviation = rand.nextInt(meanInterval/2); //possible deviation of half of the interval range seems good (since this is the first interval, i'm making sure it won't be negative)
 
         /*
         Log.d("checking times", "in ms");
@@ -135,12 +136,15 @@ public class NotificationService extends IntentService {
         intervals.push(initialWait + deviation);
         for (int i = 1; i < numTimes; i++){
             deviation = rand.nextInt(meanInterval / 2);
-            Log.d("interval " + i, "" + (meanInterval + deviation));
+
             intervals.push(meanInterval + deviation);
+            Log.d("interval " + i, "" + (meanInterval + deviation));
+            //WTF what is going wrong here? the program stops here
         }
 
+        Log.d("what going wrong here?", "");
         intervals.push(24 * 60 * 60 * 1000 - timeRange); //add 24 hours minus the time range to start again tomorrow
-
+        Log.d("" + intervals.peek(), "");
         //NOTE this is currently not strictly within the specified range
         return intervals;
     }
