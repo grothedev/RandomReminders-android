@@ -15,10 +15,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -33,7 +35,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Stack;
 
-//CURRENT STATUS: dealing with times
 public class MainActivity extends AppCompatActivity {
 
     //a main concern with this app is the fact that it needs to be running constantly in background (i think).
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     TimePicker inputEndTime;
     EditText inputNumTimes; //# times you will get notified each day
     Switch switchActive;
+
+    TextView tvActive;
 
     InputStream remindersFile;
 
@@ -103,6 +106,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        Button test = (Button) findViewById(R.id.testButton);
+        test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isServiceActive()){
+                    toast("active");
+                } else toast("inactive");
+            }
+        });
+
     }
 
     //this method is called after everything is set up, it starts the process of notifying at certain random times, and saves preferences
@@ -139,11 +152,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         editor.commit();
-        toast("prefs commited");
+        toast("Random Reminders are now active");
+        tvActive.setText("Active");
     }
 
     private void deactivate(){
         stopService(bgServiceIntent);
+        prefs.edit().putBoolean("active", false);
+        prefs.edit().commit();
+        tvActive.setText("Inactive");
     }
 
 
@@ -237,17 +254,21 @@ public class MainActivity extends AppCompatActivity {
 
         //select to have the app be active or inactive
         switchActive = (Switch) findViewById(R.id.switchActive);
+        tvActive = (TextView) findViewById(R.id.textViewActive);
 
-        if (prefs.contains("active")){
-            if (isServiceActive()){
-                switchActive.setChecked(prefs.getBoolean("active", false));
-            } else {
-                prefs.edit().putBoolean("active", false);
-                prefs.edit().commit();
-                switchActive.setChecked(false);
-            }
 
+        if (isServiceActive()){
+            switchActive.setChecked(true);
+            prefs.edit().putBoolean("active", true);
+            prefs.edit().commit();
+            tvActive.setText("Active");
+        } else {
+            prefs.edit().putBoolean("active", false);
+            prefs.edit().commit();
+            switchActive.setChecked(false);
         }
+
+
     }
 
     //returns whether or not the background service of random notifications is running
@@ -256,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
         final List<ActivityManager.RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
 
         for (ActivityManager.RunningServiceInfo runningServiceInfo : services){
-            if (runningServiceInfo.service.getClassName().equals("NotificationService")){
+            if (runningServiceInfo.service.getClassName().contains("grothedev.randomreminders.NotificationService")){
                 return true;
             }
         }

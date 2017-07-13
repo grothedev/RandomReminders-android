@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.app.NotificationCompat;
@@ -64,6 +65,8 @@ public class NotificationService extends IntentService {
             PendingIntent alarmIntent = PendingIntent.getService(getApplicationContext(), 0, notificationIntent, 0);
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + timeIntervals.pop(), alarmIntent);
             Log.d("alarm is now set up", "");
+
+
 
         } else if (intent.getAction().equals("NOTIFY")){
             Log.d("t", "t");
@@ -145,6 +148,7 @@ public class NotificationService extends IntentService {
         Log.d("what going wrong here?", "");
         intervals.push(24 * 60 * 60 * 1000 - timeRange); //add 24 hours minus the time range to start again tomorrow
         Log.d("" + intervals.peek(), "");
+
         //NOTE this is currently not strictly within the specified range
         return intervals;
     }

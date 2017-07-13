@@ -32,25 +32,64 @@
 
         <EditText
             android:id="@+id/editTextFilePath"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPersonName"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_gravity="center"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp" />
 
-        <TimePicker
-            android:id="@+id/timePickerStart"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"
-            app:layout_constraintBottom_toTopOf="@+id/timePickerEnd" />
+            android:orientation="horizontal"
+            android:paddingTop = "16dp">
 
-        <TimePicker
-            android:id="@+id/timePickerEnd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="visible"
-            app:layout_constraintBottom_toTopOf="@+id/editTextNumTimesDaily" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text = "start time"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"/>
+
+                <TimePicker
+                    android:id="@+id/timePickerStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text = "end time"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"/>
+
+                <TimePicker
+                    android:id="@+id/timePickerEnd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+
+        </LinearLayout>
 
         <EditText
             android:id="@+id/editTextNumTimesDaily"
@@ -58,15 +97,32 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="number"
-            app:layout_constraintBottom_toTopOf="@+id/switchActive" />
+            android:layout_gravity="center" />
 
-        <Switch
-            android:id="@+id/switchActive"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Switch
+                android:id="@+id/switchActive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id = "@+id/textViewActive"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/active"/>
+        </LinearLayout>
+
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Active"
-            app:layout_constraintTop_toBottomOf="@+id/editTextNumTimesDaily" />
-
+            android:id = "@+id/testButton"
+            android:text = "is service running"/>
 
 
     </LinearLayout>
