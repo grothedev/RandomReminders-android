@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">RandomReminders</string>
+    <string name="pref_active">Active</string>
+    <string name="pref_vibrate">Vibrate</string>
+    <string name="pref_led">Flash LED</string>
+    <string name="pref_sound">Notification Sound</string>
 </resources>

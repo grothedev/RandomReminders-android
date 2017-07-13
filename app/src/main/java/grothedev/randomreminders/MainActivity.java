@@ -2,7 +2,11 @@ package grothedev.randomreminders;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
+import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -25,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Random;
 import java.util.Stack;
 
@@ -47,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
 
     ArrayList<String> messages;
 
+    SharedPreferences prefs;
+
+    Intent bgServiceIntent; //intent for the background service which will randomly notify
+
     //public static Stack<Integer> timeIntervals;
 
     //@TargetApi(23) //this is for getting the time from the time pickers
@@ -55,9 +64,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initUIElements();
-        //TODO check whether or not the thing is active already
+        //restore preferences
+        prefs = getPreferences(0);
 
+        initUIElements();
 
         switchActive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -79,37 +89,45 @@ public class MainActivity extends AppCompatActivity {
                             t.show();
                             switchActive.setChecked(false);
                         } else {
-                            doNotifications();
+                            activate();
                         }
                     } else {
-                        doNotifications();
+                        activate();
                     }
 
                 } else {
-                    //deactivate
+                    if (isServiceActive()){
+                        stopService()
+                    }
                 }
             }
         });
+
+
     }
 
-    //this method is called after everything is set up, it starts the process of notifying at certain random times
-    private void doNotifications(){
+    //this method is called after everything is set up, it starts the process of notifying at certain random times, and saves preferences
+    private void activate(){
 
         /*Log.d("check input values", inputStartTime.getCurrentHour() + ": " + inputStartTime.getCurrentMinute()
                                     + "; " + inputEndTime.getCurrentHour() + ": " + inputEndTime.getCurrentMinute()
                                     + "; " + Integer.parseInt(inputNumTimes.getText().toString()));
         */
 
-        Intent notificationIntent = new Intent(this, NotificationService.class);
+        bgServiceIntent = new Intent(this, NotificationService.class);
 
         //passing relevant data to the background process
-        notificationIntent.putExtra("startTime", inputStartTime.getCurrentHour() * 60 * 60 * 1000 + inputStartTime.getCurrentMinute() * 60 * 1000);
-        notificationIntent.putExtra("endTime", inputEndTime.getCurrentHour() * 60 * 60 * 1000 + inputEndTime.getCurrentMinute() * 60 * 1000);
-        notificationIntent.putExtra("numTimes", Integer.parseInt(inputNumTimes.getText().toString()));
-        notificationIntent.putExtra("messages", messages);
-        notificationIntent.setAction("SETUP_BACKGROUND_SERVICE");
+        bgServiceIntent.putExtra("startTime", inputStartTime.getCurrentHour() * 60 * 60 * 1000 + inputStartTime.getCurrentMinute() * 60 * 1000);
+        bgServiceIntent.putExtra("endTime", inputEndTime.getCurrentHour() * 60 * 60 * 1000 + inputEndTime.getCurrentMinute() * 60 * 1000);
+        bgServiceIntent.putExtra("numTimes", Integer.parseInt(inputNumTimes.getText().toString()));
+        bgServiceIntent.putExtra("messages", messages);
+        bgServiceIntent.setAction("SETUP_BACKGROUND_SERVICE");
 
-        startService(notificationIntent);
+        startService(bgServiceIntent);
+    }
+
+    private void deactivate(){
+        stopService();
     }
 
 
@@ -173,15 +191,60 @@ public class MainActivity extends AppCompatActivity {
         //input string for path of file of phrases
         inputFilePath = (EditText) findViewById(R.id.editTextFilePath);
 
+        if (prefs.contains("filePath")){
+            inputFilePath.setText(prefs.getString("filePath", null));
+        }
+
+
         //select start and end time of when reminders should appear each day
         inputStartTime = (TimePicker) findViewById(R.id.timePickerStart);
         inputEndTime = (TimePicker) findViewById(R.id.timePickerEnd);
 
+        if (prefs.contains("startTimeH")){
+            inputStartTime.setCurrentHour(prefs.getInt("startTimeH", 0));
+        }
+        if (prefs.contains("startTimeM")){
+            inputStartTime.setCurrentMinute(prefs.getInt("startTimeM", 0));
+        }
+        if (prefs.contains("endTimeH")){
+            inputStartTime.setCurrentHour(prefs.getInt("endTimeH", 0));
+        }
+        if (prefs.contains("endTimeM")){
+            inputStartTime.setCurrentMinute(prefs.getInt("endTimeM", 0));
+        }
+
+
         //select how many reminders to have each day
         inputNumTimes = (EditText) findViewById(R.id.editTextNumTimesDaily);
 
+        if (prefs.contains("numTimes")){
+            inputNumTimes.setText(prefs.getInt("numTimes", 1));
+        }
 
         //select to have the app be active or inactive
         switchActive = (Switch) findViewById(R.id.switchActive);
+
+        if (prefs.contains("active")){
+            if (isServiceActive()){
+                switchActive.setChecked(prefs.getBoolean("active", false));
+            } else {
+                prefs.edit().putBoolean("active", false);
+                switchActive.setChecked(false);
+            }
+
+        }
+    }
+
+    //returns whether or not the background service of random notifications is running
+    private boolean isServiceActive(){
+        final ActivityManager activityManager = (ActivityManager)getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        final List<ActivityManager.RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
+
+        for (ActivityManager.RunningServiceInfo runningServiceInfo : services){
+            if (runningServiceInfo.service.getClassName().equals("NotificationService")){
+                return true;
+            }
+        }
+        return false;
     }
 }
