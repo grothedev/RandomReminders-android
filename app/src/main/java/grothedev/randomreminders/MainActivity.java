@@ -85,8 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     //make sure start time is before end time
                     if (inputStartTime.getCurrentHour() > inputEndTime.getCurrentHour()){
                         if (inputStartTime.getCurrentMinute() >= inputEndTime.getCurrentMinute()){
-                            Toast t = Toast.makeText(getApplicationContext(), "your start time is after the end time", Toast.LENGTH_SHORT);
-                            t.show();
+                            toast("your start time is after the end time");
                             switchActive.setChecked(false);
                         } else {
                             activate();
@@ -97,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
                 } else {
                     if (isServiceActive()){
-                        stopService()
+                        deactivate();
                     }
                 }
             }
@@ -114,6 +113,14 @@ public class MainActivity extends AppCompatActivity {
                                     + "; " + Integer.parseInt(inputNumTimes.getText().toString()));
         */
 
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("filePath", inputFilePath.getText().toString());
+        editor.putInt("startTimeH", inputStartTime.getCurrentHour());
+        editor.putInt("startTimeM", inputStartTime.getCurrentMinute());
+        editor.putInt("endTimeH", inputEndTime.getCurrentHour());
+        editor.putInt("endTimeM", inputEndTime.getCurrentMinute());
+        editor.putInt("numTimes", Integer.parseInt(inputNumTimes.getText().toString()));
+
         bgServiceIntent = new Intent(this, NotificationService.class);
 
         //passing relevant data to the background process
@@ -123,11 +130,20 @@ public class MainActivity extends AppCompatActivity {
         bgServiceIntent.putExtra("messages", messages);
         bgServiceIntent.setAction("SETUP_BACKGROUND_SERVICE");
 
-        startService(bgServiceIntent);
+        try {
+            startService(bgServiceIntent);
+            editor.putBoolean("active", true);
+        } catch (Exception e){
+            editor.putBoolean("active", false);
+            toast("wasn't able to start background service");
+        }
+
+        editor.commit();
+        toast("prefs commited");
     }
 
     private void deactivate(){
-        stopService();
+        stopService(bgServiceIntent);
     }
 
 
@@ -144,8 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     getPhrasesFromFile();
                 } else {
-                    Toast t = Toast.makeText(getApplicationContext(), "i need to be able to read strings from a text file on your device, otherwise i am useless", Toast.LENGTH_LONG);
-                    t.show();
+                    toast("i need to be able to read strings from a text file on your device, otherwise i am useless");
                 }
         }
     }
@@ -207,18 +222,17 @@ public class MainActivity extends AppCompatActivity {
             inputStartTime.setCurrentMinute(prefs.getInt("startTimeM", 0));
         }
         if (prefs.contains("endTimeH")){
-            inputStartTime.setCurrentHour(prefs.getInt("endTimeH", 0));
+            inputEndTime.setCurrentHour(prefs.getInt("endTimeH", 0));
         }
         if (prefs.contains("endTimeM")){
-            inputStartTime.setCurrentMinute(prefs.getInt("endTimeM", 0));
+            inputEndTime.setCurrentMinute(prefs.getInt("endTimeM", 0));
         }
-
 
         //select how many reminders to have each day
         inputNumTimes = (EditText) findViewById(R.id.editTextNumTimesDaily);
 
         if (prefs.contains("numTimes")){
-            inputNumTimes.setText(prefs.getInt("numTimes", 1));
+            inputNumTimes.setText(Integer.toString(prefs.getInt("numTimes", 1)));
         }
 
         //select to have the app be active or inactive
@@ -229,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
                 switchActive.setChecked(prefs.getBoolean("active", false));
             } else {
                 prefs.edit().putBoolean("active", false);
+                prefs.edit().commit();
                 switchActive.setChecked(false);
             }
 
@@ -246,5 +261,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    private void toast(String s){
+        Toast t = Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT);
+        t.show();
     }
 }

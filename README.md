@@ -3,7 +3,6 @@ you put in a text file, specify a time range and an integer n, the app will then
 
 TODO:
 	allow for file selection rather than type in path
-	make it repeat everyday
 	implement notification settings
-	implement saved settings
 	display on the UI whether or not the thing is active
+	add ability to change notification settings (vibrate, sound, led)
