@@ -31,7 +31,8 @@ public class NotificationService extends IntentService {
     static private ArrayList<String> messages;
     static private Stack<Integer> timeIntervals;
 
-    private int startTime, endTime, numTimes;
+
+    static private int startTime, endTime, numTimes;
 
     public NotificationService(){
         super("NotificationService");
@@ -54,15 +55,17 @@ public class NotificationService extends IntentService {
                 Log.d("a time interval", timeIntervals.pop().toString());
             }*/
 
+
             //setting up alarm
             Intent notificationIntent = new Intent(getApplicationContext(), NotificationService.class);
             notificationIntent.setAction("NOTIFY");
             AlarmManager alarmManager = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             PendingIntent alarmIntent = PendingIntent.getService(getApplicationContext(), 0, notificationIntent, 0);
-
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + timeIntervals.pop(), alarmIntent);
+            Log.d("alarm is now set up", "");
 
         } else if (intent.getAction().equals("NOTIFY")){
+            Log.d("t", "t");
             if (!timeIntervals.isEmpty()){
                 Random r = new Random();
                 int i = r.nextInt(messages.size() - 1);
@@ -83,14 +86,11 @@ public class NotificationService extends IntentService {
                     notificationManager.notify(001, mBuilder.build());
                 }
 
-                Intent notificationIntent = new Intent(getApplicationContext(), NotificationService.class);
-                notificationIntent.setAction("NOTIFY");
-                AlarmManager alarmManager = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-                PendingIntent alarmIntent = PendingIntent.getService(getApplicationContext(), 0, notificationIntent, 0);
-
-                alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + timeIntervals.pop(), alarmIntent);
+                setAlarm();
             } else {
-               stopSelf();
+               //this is the first notification for today. need to populate time intervals stack again
+                timeIntervals = generateTimeIntervals();
+                setAlarm();
             }
 
         }
@@ -108,28 +108,49 @@ public class NotificationService extends IntentService {
         Stack<Integer> intervals = new Stack<>();
         Random rand = new Random();
 
-        int currentTime = Calendar.getInstance().get(Calendar.MILLISECOND);
+        int currentTime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)*60*60*1000 + Calendar.getInstance().get(Calendar.MINUTE) * 60 * 1000;
         int initialWait = 0; //how long to wait before firing the first notification
 
-        if (startTime > currentTime) {
-            startTime = currentTime;
+        int timeRange = endTime - startTime;
+
+        if (startTime < currentTime) {
+            initialWait = 0;
         } else {
             initialWait = startTime - currentTime;
         }
 
-        int timeRange = endTime - startTime;
-
         int meanInterval = timeRange / numTimes;
         int deviation = rand.nextInt(meanInterval) - meanInterval/2; //possible deviation of half of the interval range seems good
-        intervals.push(initialWait + deviation);
 
+        /*
+        Log.d("checking times", "in ms");
+        Log.d("current time", Integer.toString(currentTime));
+        Log.d("start time", Integer.toString(startTime));
+        Log.d("end time", Integer.toString(endTime));
+        Log.d("time range", Integer.toString(timeRange));
+        Log.d("initial wait", Integer.toString(initialWait));
+        */
+
+
+        intervals.push(initialWait + deviation);
         for (int i = 1; i < numTimes; i++){
             deviation = rand.nextInt(meanInterval / 2);
+            Log.d("interval " + i, "" + (meanInterval + deviation));
             intervals.push(meanInterval + deviation);
         }
 
+        intervals.push(24 * 60 * 60 * 1000 - timeRange); //add 24 hours minus the time range to start again tomorrow
+
         //NOTE this is currently not strictly within the specified range
         return intervals;
+    }
+
+    private void setAlarm(){
+        Intent notificationIntent = new Intent(getApplicationContext(), NotificationService.class);
+        notificationIntent.setAction("NOTIFY");
+        AlarmManager alarmManager = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        PendingIntent alarmIntent = PendingIntent.getService(getApplicationContext(), 0, notificationIntent, 0);
+        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + timeIntervals.pop(), alarmIntent);
     }
 
 }

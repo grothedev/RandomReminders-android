@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.Time;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -91,17 +92,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //this method is called after everything is set up, it starts the process of notifying at certain random times, which i will research next
+    //this method is called after everything is set up, it starts the process of notifying at certain random times
     private void doNotifications(){
 
-        Stack<Integer> timeIntervals = generateTimeIntervals(); //contains time intervals in ms between each notification, starting now. the background service will pop these time intervals.
+        /*Log.d("check input values", inputStartTime.getCurrentHour() + ": " + inputStartTime.getCurrentMinute()
+                                    + "; " + inputEndTime.getCurrentHour() + ": " + inputEndTime.getCurrentMinute()
+                                    + "; " + Integer.parseInt(inputNumTimes.getText().toString()));
+        */
 
-        NotificationService notificationService = new NotificationService();
         Intent notificationIntent = new Intent(this, NotificationService.class);
 
         //passing relevant data to the background process
-        notificationIntent.putExtra("startTime", inputStartTime.getCurrentHour() * 60 * 60 + inputStartTime.getCurrentMinute() * 60);
-        notificationIntent.putExtra("endTime", inputEndTime.getCurrentHour() * 60 * 60 + inputEndTime.getCurrentMinute() * 60);
+        notificationIntent.putExtra("startTime", inputStartTime.getCurrentHour() * 60 * 60 * 1000 + inputStartTime.getCurrentMinute() * 60 * 1000);
+        notificationIntent.putExtra("endTime", inputEndTime.getCurrentHour() * 60 * 60 * 1000 + inputEndTime.getCurrentMinute() * 60 * 1000);
         notificationIntent.putExtra("numTimes", Integer.parseInt(inputNumTimes.getText().toString()));
         notificationIntent.putExtra("messages", messages);
         notificationIntent.setAction("SETUP_BACKGROUND_SERVICE");
@@ -109,35 +112,6 @@ public class MainActivity extends AppCompatActivity {
         startService(notificationIntent);
     }
 
-    private Stack<Integer> generateTimeIntervals(){
-        Stack<Integer> intervals = new Stack<>();
-        Random rand = new Random();
-
-        int startTime = inputStartTime.getCurrentHour() * 60 * 60 + inputStartTime.getCurrentMinute() * 60;
-        int endTime = inputEndTime.getCurrentHour() * 60 * 60 + inputEndTime.getCurrentMinute() * 60;
-        int currentTime = Calendar.getInstance().get(Calendar.MILLISECOND);
-        int initialWait = 0; //how long to wait before firing the first notification
-
-        if (startTime > currentTime) {
-            startTime = currentTime;
-        } else {
-            initialWait = startTime - currentTime;
-        }
-
-        int timeRange = endTime - startTime;
-
-        int meanInterval = timeRange / Integer.parseInt(inputNumTimes.getText().toString());
-        int deviation = rand.nextInt(meanInterval) - meanInterval/2; //possible deviation of half of the interval range seems good
-        intervals.push(initialWait + deviation);
-
-        for (int i = 1; i < Integer.parseInt(inputNumTimes.getText().toString()); i++){
-            deviation = rand.nextInt(meanInterval / 2);
-            intervals.push(meanInterval + deviation);
-        }
-
-        //NOTE this is currently not strictly within the specified range
-        return intervals;
-    }
 
     private void requestFileReadPermission(){
         ActivityCompat.requestPermissions(this,
