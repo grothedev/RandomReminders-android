@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -68,9 +69,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //restore preferences
-        prefs = getPreferences(0);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         initUIElements();
+        bgServiceIntent = new Intent(this, NotificationService.class);
 
         switchActive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -99,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
                 } else {
                     if (isServiceActive()){
+                        Log.d("switch", "triggered to deactivate");
                         deactivate();
                     }
                 }
@@ -133,8 +136,6 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("endTimeH", inputEndTime.getCurrentHour());
         editor.putInt("endTimeM", inputEndTime.getCurrentMinute());
         editor.putInt("numTimes", Integer.parseInt(inputNumTimes.getText().toString()));
-
-        bgServiceIntent = new Intent(this, NotificationService.class);
 
         //passing relevant data to the background process
         bgServiceIntent.putExtra("startTime", inputStartTime.getCurrentHour() * 60 * 60 * 1000 + inputStartTime.getCurrentMinute() * 60 * 1000);
@@ -259,12 +260,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (isServiceActive()){
             switchActive.setChecked(true);
-            prefs.edit().putBoolean("active", true);
-            prefs.edit().commit();
             tvActive.setText("Active");
         } else {
-            prefs.edit().putBoolean("active", false);
-            prefs.edit().commit();
             switchActive.setChecked(false);
         }
 
@@ -273,15 +270,19 @@ public class MainActivity extends AppCompatActivity {
 
     //returns whether or not the background service of random notifications is running
     private boolean isServiceActive(){
-        final ActivityManager activityManager = (ActivityManager)getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        final List<ActivityManager.RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
+        /*ActivityManager activityManager = (ActivityManager)getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
 
         for (ActivityManager.RunningServiceInfo runningServiceInfo : services){
-            if (runningServiceInfo.service.getClassName().contains("grothedev.randomreminders.NotificationService")){
+            Log.d("service: ", runningServiceInfo.service.getPackageName());
+            if (runningServiceInfo.service.getClassName().contains("grothedev.randomreminders/.NotificationService")){
                 return true;
             }
         }
         return false;
+        */
+
+        return NotificationService.isRunning;
     }
 
     private void toast(String s){

@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -32,8 +34,11 @@ public class NotificationService extends IntentService {
     static private ArrayList<String> messages;
     static private Stack<Integer> timeIntervals;
 
+    SharedPreferences prefs;
 
     static private int startTime, endTime, numTimes;
+
+    public static boolean isRunning;
 
     public NotificationService(){
         super("NotificationService");
@@ -43,7 +48,10 @@ public class NotificationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent){
 
+        isRunning = true;
+
         if (intent.getAction().equals("SETUP_BACKGROUND_SERVICE")){
+
             messages = (ArrayList<String>) intent.getSerializableExtra("messages");
             startTime = (int) intent.getSerializableExtra("startTime");
             endTime = (int) intent.getSerializableExtra("endTime");
@@ -161,4 +169,9 @@ public class NotificationService extends IntentService {
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + timeIntervals.pop(), alarmIntent);
     }
 
+    @Override
+    public void onDestroy() {
+        isRunning = false;
+        Log.d("notification service", "onDestroy() called");
+    }
 }
