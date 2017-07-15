@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         //restore preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -271,11 +273,12 @@ public class MainActivity extends AppCompatActivity {
         return false;
         */
 
-        return NotificationServiceOld.isRunning;
+        return NotificationService.isRunning;
     }
 
     private void toast(String s){
         Toast t = Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT);
         t.show();
     }
+
 }

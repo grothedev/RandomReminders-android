@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name = ".NotificationServiceOld" />
+        <service android:name = ".NotificationService" />
 
     </application>
 
