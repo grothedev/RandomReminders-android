@@ -1,5 +1,16 @@
 package grothedev.randomreminders;
 
+
+/*
+   Random Reminders android app. app to randomly notify a line from a text file at random times each day within a certain time range.
+   Copyright (C) 2017  Thomas Grothe
+
+      This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+*/
+
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -156,8 +167,6 @@ public class NotificationService extends Service {
             intervals.add(meanInterval + deviation);
             Log.d("interval " + i, "" + (meanInterval + deviation));
         }
-
-        Log.d("", "what going wrong here?");
         intervals.add(24 * 60 * 60 * 1000 - timeRange); //add 24 hours minus the time range to start again tomorrow
 
         //NOTE this is currently not strictly within the specified range
