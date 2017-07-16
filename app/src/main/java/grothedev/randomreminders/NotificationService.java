@@ -70,14 +70,15 @@ public class NotificationService extends Service {
 
             //setting up alarm
             Log.d("", "now setting up alarm");
-            Intent notificationIntent = new Intent(this, NotificationService.class);
+            /*Intent notificationIntent = new Intent(this, NotificationService.class);
             notificationIntent.setAction("NOTIFY");
             AlarmManager alarmManager = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             PendingIntent alarmIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
             long time = SystemClock.elapsedRealtime() + timeIntervals.remove();
             alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, time, alarmIntent);
+            */
+            setAlarm();
             Log.d("current time", "" + SystemClock.elapsedRealtime());
-            Log.d("active alarm:", "" + time);
 
 
 
@@ -93,9 +94,12 @@ public class NotificationService extends Service {
                         .setContentTitle("Remember")
                         .setContentText(messages.get(i));
 
-                if (Settings.notificationLED) mBuilder.setLights(80, 700, 1200);
-                if (Settings.notificationVibrate) mBuilder.setVibrate(new long[]{10, 10, 10, 10, 20, 20, 30, 30, 50, 50, 80, 80, 130, 130, 210,210, 130, 130, 50, 50, 30, 30, 20, 20, 10, 10, 10, 10});
 
+                if (Settings.notificationLED) mBuilder.setLights(80, 700, 1200);
+                if (Settings.notificationVibrate) {
+                    //mBuilder.setVibrate(new long[]{10, 10, 10, 10, 20, 20, 30, 30, 50, 50, 80, 80, 130, 130, 210, 210, 130, 130, 50, 50, 30, 30, 20, 20, 10, 10, 10, 10});
+                    mBuilder.setVibrate(new long[]{200, 200, 200, 200, 300});
+                }
                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
                 synchronized (notificationManager) {
@@ -105,7 +109,7 @@ public class NotificationService extends Service {
 
                 setAlarm();
             } else {
-                //this is the first notification for today. need to populate time intervals stack again
+                //this is the first notification for today. need to populate time intervals queue again
                 timeIntervals = generateTimeIntervals();
                 setAlarm();
             }
@@ -125,13 +129,15 @@ public class NotificationService extends Service {
         int timeRange = endTime - startTime;
 
         if (startTime < currentTime) {
-            initialWait = 0;
+            timeRange = endTime - currentTime;
         } else {
             initialWait = startTime - currentTime;
         }
 
         int meanInterval = timeRange / numTimes;
         int deviation = rand.nextInt(meanInterval/2); //possible deviation of half of the interval range seems good (since this is the first interval, i'm making sure it won't be negative)
+
+        intervals.add(deviation);
 
         /*
         Log.d("checking times", "in ms");
@@ -143,18 +149,16 @@ public class NotificationService extends Service {
         */
 
 
-        intervals.add(initialWait + deviation);
+
         for (int i = 1; i < numTimes; i++){
-            deviation = rand.nextInt(meanInterval / 2);
+            deviation = rand.nextInt(meanInterval / 2) - meanInterval/2;
 
             intervals.add(meanInterval + deviation);
             Log.d("interval " + i, "" + (meanInterval + deviation));
-            //WTF what is going wrong here? the program stops here
         }
 
         Log.d("", "what going wrong here?");
         intervals.add(24 * 60 * 60 * 1000 - timeRange); //add 24 hours minus the time range to start again tomorrow
-        //Log.d("" + intervals.peek(), "");
 
         //NOTE this is currently not strictly within the specified range
         return intervals;
