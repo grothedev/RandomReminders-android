@@ -97,7 +97,7 @@ public class NotificationService extends Service {
             Log.d("t", "t");
             if (!timeIntervals.isEmpty()){
                 Random r = new Random();
-                int i = r.nextInt(messages.size() - 1);
+                int i = r.nextInt(messages.size());
 
                 //this is how i will make a simple notification
                 NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext())
