@@ -18,12 +18,15 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -54,9 +57,9 @@ public class NotificationService extends Service {
 
     @Override
     public void onCreate() {
-
-        Log.d("notif service", "created");
         super.onCreate();
+        Log.d("notif service", "created");
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     }
 
     @Override
@@ -106,10 +109,14 @@ public class NotificationService extends Service {
                         .setContentText(messages.get(i));
 
 
-                if (Settings.notificationLED) mBuilder.setLights(80, 700, 1200);
-                if (Settings.notificationVibrate) {
+                if (prefs.getBoolean("pref_led", true)) mBuilder.setLights(80, 700, 1200);
+                if (prefs.getBoolean("pref_vibrate", true)) {
                     //mBuilder.setVibrate(new long[]{10, 10, 10, 10, 20, 20, 30, 30, 50, 50, 80, 80, 130, 130, 210, 210, 130, 130, 50, 50, 30, 30, 20, 20, 10, 10, 10, 10});
                     mBuilder.setVibrate(new long[]{200, 200, 200, 200, 300});
+                }
+                if (prefs.getBoolean("pref_sound", false)){
+                    Uri notificationSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    mBuilder.setSound(notificationSound);
                 }
                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 

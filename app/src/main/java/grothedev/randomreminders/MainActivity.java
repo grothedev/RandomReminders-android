@@ -12,6 +12,7 @@ package grothedev.randomreminders;
 
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -69,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
 
     //public static Stack<Integer> timeIntervals;
 
-    //@TargetApi(23) //this is for getting the time from the time pickers
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -304,11 +304,24 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.settings:
-                Fragment settingsFrag = new SettingsFragment();
+                if (getFragmentManager().getBackStackEntryCount() == 0){
+                    Fragment settingsFrag = new SettingsFragment();
 
-                getFragmentManager().beginTransaction()
-                        .replace(android.R.id.content, settingsFrag)
-                        .commit();
+                    getFragmentManager().beginTransaction()
+                            .replace(android.R.id.content, settingsFrag)
+                            .addToBackStack("settings_frag")
+                            .commit();
+                }
+
+                return true;
+            case R.id.home:
+                if (getFragmentManager().getBackStackEntryCount() >= 1){
+                    getFragmentManager().popBackStack();
+                }
+                return true;
+            case R.id.about:
+                //show dialog for info about the app
+                toast("dialog for about");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
