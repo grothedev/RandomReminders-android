@@ -12,9 +12,11 @@ package grothedev.randomreminders;
 
 
 import android.Manifest;
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
@@ -22,6 +24,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -70,7 +75,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        //sets default notification settings the first time the app is run
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         //restore preferences
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -114,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        Button test = (Button) findViewById(R.id.testButton);
+        /*Button test = (Button) findViewById(R.id.testButton);
         test.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                     toast("active");
                 } else toast("inactive");
             }
-        });
+        });*/
 
     }
 
@@ -272,17 +278,6 @@ public class MainActivity extends AppCompatActivity {
 
     //returns whether or not the background service of random notifications is running
     private boolean isServiceActive(){
-        /*ActivityManager activityManager = (ActivityManager)getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
-
-        for (ActivityManager.RunningServiceInfo runningServiceInfo : services){
-            Log.d("service: ", runningServiceInfo.service.getPackageName());
-            if (runningServiceInfo.service.getClassName().contains("grothedev.randomreminders/.NotificationServiceOld")){
-                return true;
-            }
-        }
-        return false;
-        */
 
         return NotificationService.isRunning;
     }
@@ -290,6 +285,29 @@ public class MainActivity extends AppCompatActivity {
     private void toast(String s){
         Toast t = Toast.makeText(getApplicationContext(), s, Toast.LENGTH_SHORT);
         t.show();
+    }
+
+    //settings stuff here
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                Fragment settingsFrag = new SettingsFragment();
+
+                getFragmentManager().beginTransaction()
+                        .replace(android.R.id.content, settingsFrag)
+                        .commit();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }
