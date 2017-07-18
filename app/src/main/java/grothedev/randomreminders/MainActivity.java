@@ -13,6 +13,7 @@ package grothedev.randomreminders;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -67,8 +68,6 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences prefs;
 
     Intent bgServiceIntent; //intent for the background service which will randomly notify
-
-    //public static Stack<Integer> timeIntervals;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -321,7 +320,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.about:
                 //show dialog for info about the app
-                toast("dialog for about");
+                DialogFragment aboutFrag = new AboutFragment();
+                aboutFrag.show(getFragmentManager(), "About");
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

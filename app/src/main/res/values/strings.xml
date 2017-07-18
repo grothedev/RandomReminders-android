@@ -6,6 +6,5 @@
     <string name="pref_sound">Notification Sound</string>
     <string name="settings">Settings</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dialog_about">I made this app because I wanted to be reminded throughout the day to stay present and have positive thoughts. All the other similar apps on the Android market had too many unnecessary features and graphics that got in the way, so I made my own. If you have any suggestions for the app or any bugs to report, please let me know via email (grothedev@gmail.com) or on the app store. \n  Source code: https://github.com/grothedev/RandomReminders-android \n </string>
 </resources>
