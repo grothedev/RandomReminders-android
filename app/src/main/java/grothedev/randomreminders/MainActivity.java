@@ -98,10 +98,15 @@ public class MainActivity extends AppCompatActivity {
                         getPhrasesFromFile();
                     }
 
+                    if (Integer.parseInt(inputNumTimes.getText().toString()) < 1){
+                        toast("You didn't specify an adequate number of times to be reminded. I will assume 1 time each day.");
+                        inputNumTimes.setText("1");
+                    }
+
                     //make sure start time is before end time
                     if (inputStartTime.getCurrentHour() > inputEndTime.getCurrentHour()){
                         if (inputStartTime.getCurrentMinute() >= inputEndTime.getCurrentMinute()){
-                            toast("your start time is after the end time");
+                            toast("Your start time is after the end time");
                             switchActive.setChecked(false);
                         } else {
                             activate();

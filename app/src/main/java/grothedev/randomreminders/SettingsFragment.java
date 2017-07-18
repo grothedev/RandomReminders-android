@@ -24,5 +24,7 @@ public class SettingsFragment extends PreferenceFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getView().setBackgroundColor(Color.WHITE);
+
     }
+
 }
