@@ -3,5 +3,3 @@ you put in a text file, specify a time range and an integer n, the app will then
 
 TODO:
 	allow for file selection rather than type in path
-	implement notification settings
-	add ability to change notification settings (vibrate, sound, led)
